@@ -25,6 +25,8 @@ public class Member {
     private String nickname;
     private String provider;
 
+    private String memberImg;
+
     private int point;
     private boolean isCreator;
 }

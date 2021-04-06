@@ -20,11 +20,13 @@ public class MemberApiController {
 
     private final MemberService memberService;
 
+    // @구식@ 회원 리스트 반환 api
     @GetMapping("/api/v1/members")
     public List<Member> memberV1() {
        return memberService.findMember();
     }
 
+    // 회원 리스트 반환 api
     @GetMapping("/api/v2/members")
     public Result memberV2() {
         List<Member> findMembers = memberService.findMember();
@@ -33,6 +35,41 @@ public class MemberApiController {
                 .collect(Collectors.toList());
         return new Result(collect);
     }
+
+    // @구식@ 회원 등록 api
+    @PostMapping("/api/v1/members")
+    public CreateMemberResponse saveMemberV1(@RequestBody @Validated Member member) {
+        Long joinId = memberService.join(member);
+        return new CreateMemberResponse(joinId);
+    }
+
+    // 회원 등록 api
+    // creatememberRequest를 만들면서 받아오는 값도 제한 둘 수 있음
+    @PostMapping("/api/v2/members")
+    public CreateMemberResponse saveMemberV2(@RequestBody @Validated CreateMemberRequest request) {
+        Member member = new Member();
+        member.setEmail(request.email);
+        member.setNickname(request.nickname);
+        member.setMemberImg(request.userImg);
+        member.setPassword(request.password);
+
+        Long joinId = memberService.join(member);
+        return new CreateMemberResponse(joinId);
+    }
+
+    // 회원 정보 수정 api
+    @PutMapping("/api/v2/members/{id}")
+    public UpdateMemberResponse updateV2(
+            @PathVariable("id") Long id,
+            @RequestBody @Validated UpdateMemberRequest request) {
+
+        memberService.update(id, request.nickname);
+        Member findOne = memberService.findOne(id);
+        return new UpdateMemberResponse(findOne.getId(), findOne.getNickname());
+    }
+
+
+
 
     // json 구조
     // optional 안되나?
@@ -49,34 +86,6 @@ public class MemberApiController {
         private String nickname;
     }
 
-    @PostMapping("/api/v1/members")
-    public CreateMemberResponse saveMemberV1(@RequestBody @Validated Member member) {
-        Long joinId = memberService.join(member);
-        return new CreateMemberResponse(joinId);
-    }
-
-    // creatememberRequest를 만들면서 받아오는 값도 제한 둘 수 있음
-    @PostMapping("/api/v2/members")
-    public CreateMemberResponse saveMemberV2(@RequestBody @Validated CreateMemberRequest request) {
-        Member member = new Member();
-        member.setEmail(request.email);
-        member.setNickname(request.nickname);
-
-        Long joinId = memberService.join(member);
-        return new CreateMemberResponse(joinId);
-    }
-
-    @PutMapping("/api/v2/members/{id}")
-    public UpdateMemberResponse updateV2(
-            @PathVariable("id") Long id,
-            @RequestBody @Validated UpdateMemberRequest request) {
-
-        memberService.update(id, request.nickname);
-//        return new UpdateMemberResponse(id, request.nickname);
-        Member findOne = memberService.findOne(id);
-        return new UpdateMemberResponse(findOne.getId(), findOne.getNickname());
-    }
-
 
     @Data
     static class CreateMemberResponse {
@@ -91,6 +100,10 @@ public class MemberApiController {
     static class CreateMemberRequest {
         private String email;
         private String nickname;
+
+        private String password;
+        private String userImg;
+
     }
 
     @Data
