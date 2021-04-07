@@ -29,6 +29,7 @@ public class MemberController {
         if (result.hasErrors()) {
             return "members/createMemberForm";
         }
+
         Member member = new Member();
         member.setEmail(form.getEmail());
         member.setPassword(form.getPassword());
